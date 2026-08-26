@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #18221f;
+  --forest: #123f33;
+  --forest-soft: #eaf2ee;
+  --gold: #b78b47;
+  --cream: #f7f4ed;
+  --line: #e7e1d5;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--cream);
+  font-family: var(--font-latin), var(--font-arabic), sans-serif;
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+[dir="rtl"] body { font-family: var(--font-arabic), var(--font-latin), sans-serif; }
+
+::selection { color: white; background: var(--forest); }
+
+.focus-ring:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 60%, transparent);
+  outline-offset: 2px;
+}

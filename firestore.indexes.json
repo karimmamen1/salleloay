@@ -1,0 +1,7 @@
+{
+  "indexes": [
+    { "collectionGroup": "reservations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "eventType", "order": "ASCENDING" }, { "fieldPath": "reservationDate", "order": "DESCENDING" }] },
+    { "collectionGroup": "reservations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "createdByUserId", "order": "ASCENDING" }, { "fieldPath": "reservationDate", "order": "DESCENDING" }] }
+  ],
+  "fieldOverrides": []
+}
