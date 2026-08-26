@@ -5,12 +5,15 @@ import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 
 const config = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-key",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "demo-salle-loay.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "demo-salle-loay",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "demo-salle-loay.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "000000000000",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:000000000000:web:demo",
+  // Firebase Web configuration is a public project identifier, not an Admin credential.
+  // Keeping the production values as fallbacks prevents hosts such as Vercel from
+  // silently connecting to a demo project when NEXT_PUBLIC_* variables are absent.
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyB3YTmWY9gj50Qu6aq2IBAcsoWaZ8kvmX4",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "salle-loay-gestion-2026.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "salle-loay-gestion-2026",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "salle-loay-gestion-2026.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "372599098824",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:372599098824:web:3126537becbd0dbe3344fd",
 };
 
 export const firebaseApp = getApps().length ? getApp() : initializeApp(config);
