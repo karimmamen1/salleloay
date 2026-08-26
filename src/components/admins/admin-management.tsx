@@ -6,7 +6,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
 import { useToast } from "@/contexts/toast-context";
-import { AdminRequestError, createAdmin, listenToAdmins, listenToReservationCounts, removeAdmin, resetAdminPassword, updateAdmin } from "@/lib/firebase/admins";
+import { AdminRequestError, createAdmin, listenToAdmins, listenToReservationCounts, removeAdmin, resetAdminPassword, updateAdmin } from "@/lib/api/admins";
 import type { AdminUser } from "@/types";
 import { formatTimestamp } from "@/utils/format";
 

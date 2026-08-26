@@ -9,8 +9,10 @@ export const formatDate = (date: string, language: Language, options?: Intl.Date
 };
 
 export const formatTimestamp = (value: Reservation["createdAt"], language: Language) => {
-  if (!value?.toDate) return "—";
-  return new Intl.DateTimeFormat(language === "ar" ? "ar-DZ" : "fr-DZ", { dateStyle: "short", timeStyle: "short", timeZone: "Africa/Algiers" }).format(value.toDate());
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat(language === "ar" ? "ar-DZ" : "fr-DZ", { dateStyle: "short", timeStyle: "short", timeZone: "Africa/Algiers" }).format(date);
 };
 
 export const todayAlgiers = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Algiers", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());

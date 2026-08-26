@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { listenToAllReservations, listenToMonth, listenToUpcoming } from "@/lib/firebase/reservations";
+import { listenToAllReservations, listenToMonth, listenToUpcoming } from "@/lib/api/reservations";
 import type { Reservation } from "@/types";
 
 export function useMonthReservations(start: string, end: string) {

@@ -10,7 +10,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { useToast } from "@/contexts/toast-context";
 import { useMonthReservations } from "@/hooks/use-reservations";
 import { useOnline } from "@/hooks/use-online";
-import { createReservation, deleteReservation, updateReservation } from "@/lib/firebase/reservations";
+import { createReservation, deleteReservation, updateReservation } from "@/lib/api/reservations";
 import type { ReservationInput } from "@/types";
 import { formatDate, todayAlgiers } from "@/utils/format";
 

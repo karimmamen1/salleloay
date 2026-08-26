@@ -1,5 +1,9 @@
+import { hash } from "bcryptjs";
 import { z } from "zod";
-import { AdminApiError, auditRecord, createAuthUser, createWrite, deleteAuthUser, firestoreCommit, firestoreGet, jsonError, randomDocumentPath, requireSuperAdmin, serverTimestamp, updateAuthUser, withAdminContext } from "@/lib/firebase/admin-server";
+import { ApiError, assertSameOrigin, jsonError } from "@/lib/api/server";
+import { requireUser } from "@/lib/auth/server";
+import { database, isUniqueViolation } from "@/lib/db/client";
+import { adminFromRow } from "@/lib/db/rows";
 
 const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9._-]{3,32}$/);
 const passwordSchema = z.string().min(10).max(128)
@@ -10,50 +14,51 @@ const createSchema = z.object({
   password: passwordSchema,
 });
 
+export async function GET() {
+  try {
+    await requireUser("super_admin");
+    const rows = await database()`
+      SELECT u.id AS uid, u.name, u.username, u.username_lower, u.role, u.active, u.created_at, u.created_by,
+        count(r.reservation_date)::integer AS reservation_count
+      FROM users u
+      LEFT JOIN reservations r ON r.created_by_user_id = u.id
+      GROUP BY u.id
+      ORDER BY u.created_at DESC
+    `;
+    return Response.json({ data: rows.map((row) => adminFromRow(row as Record<string, unknown>)) });
+  } catch (error) {
+    return jsonError(error);
+  }
+}
 export async function POST(request: Request) {
-  return withAdminContext(request, async () => {
-    let createdUid: string | undefined;
-    try {
-      const caller = await requireSuperAdmin(request);
-      const parsed = createSchema.safeParse(await request.json());
-      if (!parsed.success) {
-        const weakPassword = parsed.error.issues.some((issue) => issue.path[0] === "password");
-        throw new AdminApiError(400, weakPassword ? "weak-password" : "invalid-argument");
-      }
-
-      const { name, username, password } = parsed.data;
-      if (await firestoreGet(`usernames/${username}`)) throw new AdminApiError(409, "username-exists");
-
-      const user = await createAuthUser({
-        email: `${username}@auth.salle-loay.local`,
-        password,
-        displayName: name,
-      });
-      createdUid = user.localId;
-      await updateAuthUser(user.localId, { customClaims: { role: "admin" } });
-
-      await firestoreCommit([
-        createWrite(`usernames/${username}`, { uid: user.localId, createdAt: serverTimestamp }),
-        createWrite(`users/${user.localId}`, {
-          name,
-          username,
-          usernameLower: username,
-          role: "admin",
-          active: true,
-          createdAt: serverTimestamp,
-          createdBy: caller.uid,
-        }),
-        createWrite(randomDocumentPath("auditLogs"), auditRecord(caller, "admin_created", {
-          targetUserId: user.localId,
-          targetUserName: name,
-        })),
-      ]);
-      return Response.json({ data: { uid: user.localId, name, username, role: "admin", active: true } }, { status: 201 });
-    } catch (error) {
-      if (createdUid) {
-        try { await deleteAuthUser(createdUid); } catch { /* Best-effort rollback. */ }
-      }
-      return jsonError(error);
+  try {
+    assertSameOrigin(request);
+    const caller = await requireUser("super_admin");
+    const parsed = createSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      const weakPassword = parsed.error.issues.some((issue) => issue.path[0] === "password");
+      throw new ApiError(400, weakPassword ? "weak-password" : "invalid-argument");
     }
-  });
+    const { name, username, password } = parsed.data;
+    const passwordHash = await hash(password, 12);
+    try {
+      const rows = await database()`
+        WITH inserted AS (
+          INSERT INTO users (name, username, username_lower, password_hash, role, active, created_by)
+          VALUES (${name}, ${username}, ${username}, ${passwordHash}, 'admin', true, ${caller.uid})
+          RETURNING *
+        ), logged AS (
+          INSERT INTO audit_logs (action, performed_by_user_id, performed_by_name, target_user_id)
+          SELECT 'admin_created', ${caller.uid}, ${caller.name}, id FROM inserted
+        )
+        SELECT id AS uid, name, username, username_lower, role, active, created_at, created_by FROM inserted
+      `;
+      return Response.json({ data: adminFromRow(rows[0] as Record<string, unknown>) }, { status: 201 });
+    } catch (error) {
+      if (isUniqueViolation(error)) throw new ApiError(409, "username-exists");
+      throw error;
+    }
+  } catch (error) {
+    return jsonError(error);
+  }
 }

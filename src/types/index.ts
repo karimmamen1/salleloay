@@ -1,5 +1,3 @@
-import type { Timestamp } from "firebase/firestore";
-
 export type Language = "fr" | "ar";
 export type UserRole = "super_admin" | "admin";
 export type EventType = "wedding" | "engagement" | "circumcision" | "birthday" | "reception" | "other";
@@ -11,7 +9,7 @@ export interface AdminUser {
   usernameLower: string;
   role: UserRole;
   active: boolean;
-  createdAt?: Timestamp | null;
+  createdAt?: string | null;
   createdBy?: string;
   reservationCount?: number;
 }
@@ -31,10 +29,10 @@ export interface Reservation {
   cleaningCost: number;
   createdByUserId: string;
   createdByName: string;
-  createdAt?: Timestamp | null;
+  createdAt?: string | null;
   updatedByUserId: string;
   updatedByName: string;
-  updatedAt?: Timestamp | null;
+  updatedAt?: string | null;
 }
 
 export interface AuditLog {
@@ -44,7 +42,7 @@ export interface AuditLog {
   performedByName: string;
   reservationId?: string;
   targetUserId?: string;
-  timestamp?: Timestamp | null;
+  timestamp?: string | null;
   changedFields?: string[];
 }
 

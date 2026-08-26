@@ -1,6 +1,5 @@
 "use client";
 
-import { doc, onSnapshot } from "firebase/firestore";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ReservationDetails } from "@/components/reservations/reservation-details";
@@ -8,8 +7,7 @@ import { ReservationForm } from "@/components/reservations/reservation-form";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
 import { useToast } from "@/contexts/toast-context";
-import { db } from "@/lib/firebase/client";
-import { deleteReservation, updateReservation } from "@/lib/firebase/reservations";
+import { deleteReservation, listenToReservation, updateReservation } from "@/lib/api/reservations";
 import type { Reservation, ReservationInput } from "@/types";
 import { formatDate } from "@/utils/format";
 
@@ -22,7 +20,7 @@ export default function ReservationPage() {
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
-  useEffect(() => onSnapshot(doc(db, "reservations", id), (snap) => setReservation(snap.exists() ? snap.data() as Reservation : null)), [id]);
+  useEffect(() => listenToReservation(id, setReservation), [id]);
   if (!reservation) return <div className="rounded-[24px] bg-white p-10 text-center text-[#7c8681]">{t.loading}</div>;
   const save = async (data: ReservationInput) => { setBusy(true); try { const result = await updateReservation(id, data); showToast(t.reservationUpdated); setEditing(false); if (result.data.id !== id) router.replace(`/reservations/${result.data.id}`); } catch { showToast(t.genericError, "error"); } finally { setBusy(false); } };
   const remove = async () => { if (!window.confirm(`${t.deleteTitle}\n\n${t.irreversible}`)) return; setBusy(true); try { await deleteReservation(id); showToast(t.reservationDeleted); router.replace("/reservations"); } catch { showToast(t.genericError, "error"); setBusy(false); } };
