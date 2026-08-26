@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AdminApiError, adminAuth, auditRecord, createWrite, deleteWrite, firestoreCommit, firestoreGet, jsonError, randomDocumentPath, requireSuperAdmin, serverTimestamp, updateWrite } from "@/lib/firebase/admin-server";
+import { AdminApiError, adminAuth, auditRecord, createWrite, deleteWrite, firestoreCommit, firestoreGet, jsonError, randomDocumentPath, requireSuperAdmin, serverTimestamp, updateWrite, withAdminContext } from "@/lib/firebase/admin-server";
 
 const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9._-]{3,32}$/);
 const updateSchema = z.object({
@@ -16,6 +16,7 @@ async function normalAdmin(uid: string) {
 }
 
 export async function PATCH(request: Request, context: { params: Promise<{ uid: string }> }) {
+  return withAdminContext(request, async () => {
   try {
     const caller = await requireSuperAdmin(request);
     const { uid } = await context.params;
@@ -80,9 +81,11 @@ export async function PATCH(request: Request, context: { params: Promise<{ uid: 
   } catch (error) {
     return jsonError(error);
   }
+  });
 }
 
 export async function DELETE(request: Request, context: { params: Promise<{ uid: string }> }) {
+  return withAdminContext(request, async () => {
   try {
     const caller = await requireSuperAdmin(request);
     const { uid } = await context.params;
@@ -103,4 +106,5 @@ export async function DELETE(request: Request, context: { params: Promise<{ uid:
   } catch (error) {
     return jsonError(error);
   }
+  });
 }

@@ -1,14 +1,19 @@
 import "server-only";
 
-import { applicationDefault, getApps, initializeApp, refreshToken, type App, type Credential } from "firebase-admin/app";
+import { applicationDefault, deleteApp, getApps, initializeApp, refreshToken, type App, type Credential } from "firebase-admin/app";
 import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { randomBytes } from "node:crypto";
-import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
 const appName = "salle-loay-admin-server";
+const projectNumber = "372599098824";
+const workloadPoolId = "vercel-salle-louay";
+const workloadProviderId = "vercel";
+const serviceAccountEmail = "vercel-salle-louay@salle-loay-gestion-2026.iam.gserviceaccount.com";
+const appContext = new AsyncLocalStorage<App>();
 
 interface FirebaseCliConfig {
   user?: { email?: string };
@@ -32,17 +37,66 @@ function serverCredential(): Credential {
   }
   if (!config.tokens?.refresh_token) throw new Error("Firebase CLI refresh token is missing. Run firebase login --reauth.");
 
-  const require = createRequire(import.meta.url);
-  const firebaseApi = require("firebase-tools/lib/api") as { clientId: () => string; clientSecret: () => string };
+  const clientId = process.env.FIREBASE_CLI_CLIENT_ID;
+  const clientSecret = process.env.FIREBASE_CLI_CLIENT_SECRET;
+  if (!clientId || !clientSecret) throw new Error("Firebase CLI OAuth client settings are missing.");
   return refreshToken({
     type: "authorized_user",
-    client_id: firebaseApi.clientId(),
-    client_secret: firebaseApi.clientSecret(),
+    client_id: clientId,
+    client_secret: clientSecret,
     refresh_token: config.tokens.refresh_token,
   });
 }
 
+function vercelCredential(oidcToken: string): Credential {
+  let cached: { access_token: string; expires_in: number; expiresAt: number } | undefined;
+  return {
+    async getAccessToken() {
+      if (cached && cached.expiresAt > Date.now() + 60_000) return cached;
+      const audience = `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${workloadPoolId}/providers/${workloadProviderId}`;
+      const tokenExchange = await fetch("https://sts.googleapis.com/v1/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          audience,
+          grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+          requested_token_type: "urn:ietf:params:oauth:token-type:access_token",
+          scope: "https://www.googleapis.com/auth/cloud-platform",
+          subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
+          subject_token: oidcToken,
+        }),
+      });
+      if (!tokenExchange.ok) throw new Error(`Vercel OIDC exchange failed: ${tokenExchange.status} ${await tokenExchange.text()}`);
+      const federated = await tokenExchange.json() as { access_token: string };
+      const impersonation = await fetch(`https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccountEmail}:generateAccessToken`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${federated.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ scope: ["https://www.googleapis.com/auth/cloud-platform"], lifetime: "3600s" }),
+      });
+      if (!impersonation.ok) throw new Error(`Service account impersonation failed: ${impersonation.status} ${await impersonation.text()}`);
+      const access = await impersonation.json() as { accessToken: string; expireTime: string };
+      const expiresIn = Math.max(60, Math.floor((Date.parse(access.expireTime) - Date.now()) / 1000));
+      cached = { access_token: access.accessToken, expires_in: expiresIn, expiresAt: Date.parse(access.expireTime) };
+      return cached;
+    },
+  };
+}
+
+export async function withAdminContext<T>(request: Request, operation: () => Promise<T>): Promise<T> {
+  const oidcToken = request.headers.get("x-vercel-oidc-token");
+  if (!oidcToken) return operation();
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "salle-loay-gestion-2026";
+  const requestApp = initializeApp({ credential: vercelCredential(oidcToken), projectId }, `${appName}-${randomBytes(8).toString("hex")}`);
+  try {
+    return await appContext.run(requestApp, operation);
+  } finally {
+    await deleteApp(requestApp);
+  }
+}
+
 function serverApp(): App {
+  const contextual = appContext.getStore();
+  if (contextual) return contextual;
   const existing = getApps().find((app) => app.name === appName);
   if (existing) return existing;
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;

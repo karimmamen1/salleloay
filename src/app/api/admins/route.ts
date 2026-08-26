@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AdminApiError, adminAuth, auditRecord, createWrite, firestoreCommit, firestoreGet, jsonError, randomDocumentPath, requireSuperAdmin, serverTimestamp } from "@/lib/firebase/admin-server";
+import { AdminApiError, adminAuth, auditRecord, createWrite, firestoreCommit, firestoreGet, jsonError, randomDocumentPath, requireSuperAdmin, serverTimestamp, withAdminContext } from "@/lib/firebase/admin-server";
 
 const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9._-]{3,32}$/);
 const passwordSchema = z.string().min(10).max(128)
@@ -11,6 +11,7 @@ const createSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  return withAdminContext(request, async () => {
   let createdUid: string | undefined;
   try {
     const caller = await requireSuperAdmin(request);
@@ -56,4 +57,5 @@ export async function POST(request: Request) {
     }
     return jsonError(error);
   }
+  });
 }

@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { AdminApiError, adminAuth, auditRecord, createWrite, firestoreCommit, firestoreGet, jsonError, randomDocumentPath, requireSuperAdmin } from "@/lib/firebase/admin-server";
+import { AdminApiError, adminAuth, auditRecord, createWrite, firestoreCommit, firestoreGet, jsonError, randomDocumentPath, requireSuperAdmin, withAdminContext } from "@/lib/firebase/admin-server";
 
 const passwordSchema = z.string().min(10).max(128)
   .regex(/[a-z]/).regex(/[A-Z]/).regex(/[0-9]/).regex(/[^A-Za-z0-9]/);
 
 export async function POST(request: Request, context: { params: Promise<{ uid: string }> }) {
+  return withAdminContext(request, async () => {
   try {
     const caller = await requireSuperAdmin(request);
     const { uid } = await context.params;
@@ -24,4 +25,5 @@ export async function POST(request: Request, context: { params: Promise<{ uid: s
   } catch (error) {
     return jsonError(error);
   }
+  });
 }
