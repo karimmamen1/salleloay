@@ -1,6 +1,7 @@
 "use client";
 
-import { Eye, EyeOff, KeyRound, Pencil, Plus, ShieldCheck, Trash2, UserCheck, Users, UserX } from "lucide-react";
+import { Eye, EyeOff, House, KeyRound, Pencil, Plus, ShieldCheck, Trash2, UserCheck, Users, UserX } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/auth-context";
@@ -114,7 +115,10 @@ export function AdminManagement() {
   return <div className="space-y-7">
     <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
       <div><p className="text-sm font-bold uppercase tracking-[.16em] text-[#b78b47]">{t.superAdmin}</p><h2 className="mt-2 text-3xl font-extrabold text-[#18221f]">{t.adminManagement}</h2></div>
-      <button onClick={openCreate} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#123f33] px-5 text-sm font-bold text-white shadow-lg shadow-[#123f33]/10"><Plus size={18} />{t.newAdmin.replace(/^\+\s*/, "")}</button>
+      <div className="flex flex-wrap gap-3">
+        <Link href="/dashboard" className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-[#d8c7a8] bg-white px-5 text-sm font-bold text-[#8f682f] transition hover:border-[#b78b47] hover:bg-[#fffaf0]"><House size={18} />{t.home}</Link>
+        <button onClick={openCreate} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#123f33] px-5 text-sm font-bold text-white shadow-lg shadow-[#123f33]/10"><Plus size={18} />{t.newAdmin.replace(/^\+\s*/, "")}</button>
+      </div>
     </header>
 
     <section className="grid gap-3 sm:grid-cols-3">

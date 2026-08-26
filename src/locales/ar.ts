@@ -5,6 +5,7 @@ export const ar = {
   username: "اسم المستخدم",
   password: "كلمة المرور",
   logout: "تسجيل الخروج",
+  home: "الرئيسية",
   calendar: "التقويم",
   reservations: "الحجوزات",
   administrators: "المشرفون",

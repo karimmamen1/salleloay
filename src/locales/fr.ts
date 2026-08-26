@@ -5,6 +5,7 @@ export const fr = {
   username: "Nom d'utilisateur",
   password: "Mot de passe",
   logout: "Déconnexion",
+  home: "Accueil",
   calendar: "Calendrier",
   reservations: "Réservations",
   administrators: "Administrateurs",
