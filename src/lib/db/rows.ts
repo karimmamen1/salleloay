@@ -2,7 +2,20 @@ import type { AdminUser, AuditLog, Reservation } from "@/types";
 
 type Row = Record<string, unknown>;
 const text = (value: unknown) => value == null ? "" : String(value);
-const timestamp = (value: unknown) => value == null ? null : new Date(String(value)).toISOString();
+const dateOnly = (value: unknown) => {
+  if (value == null) return "";
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
+  const raw = String(value);
+  const isoDate = raw.match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  if (isoDate) return isoDate;
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString().slice(0, 10);
+};
+const timestamp = (value: unknown) => {
+  if (value == null) return null;
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+};
 
 export function adminFromRow(row: Row): AdminUser {
   return {
@@ -20,7 +33,7 @@ export function adminFromRow(row: Row): AdminUser {
 
 export function reservationFromRow(row: Row): Reservation {
   return {
-    reservationDate: text(row.reservationDate ?? row.reservation_date).slice(0, 10),
+    reservationDate: dateOnly(row.reservationDate ?? row.reservation_date),
     customerName: text(row.customerName ?? row.customer_name),
     phone: text(row.phone),
     eventType: row.eventType === "engagement" || row.event_type === "engagement" ? "engagement"
@@ -52,10 +65,9 @@ export function auditFromRow(row: Row): AuditLog {
     action: text(row.action),
     performedByUserId: text(row.performedByUserId ?? row.performed_by_user_id),
     performedByName: text(row.performedByName ?? row.performed_by_name),
-    reservationId: row.reservationId == null && row.reservation_id == null ? undefined : text(row.reservationId ?? row.reservation_id).slice(0, 10),
+    reservationId: row.reservationId == null && row.reservation_id == null ? undefined : dateOnly(row.reservationId ?? row.reservation_id),
     targetUserId: row.targetUserId == null && row.target_user_id == null ? undefined : text(row.targetUserId ?? row.target_user_id),
     timestamp: timestamp(row.timestamp ?? row.created_at),
     changedFields: Array.isArray(fields) ? fields.map(String) : undefined,
   };
 }
-
