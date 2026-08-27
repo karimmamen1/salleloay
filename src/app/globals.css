@@ -33,5 +33,6 @@ button { cursor: pointer; }
 .app-sidebar[data-open="true"] { translate: 0 0; }
 
 @media (min-width: 64rem) {
-  .app-sidebar { translate: 0 0; }
+  .app-sidebar,
+  [dir="rtl"] .app-sidebar { translate: 0 0; }
 }
