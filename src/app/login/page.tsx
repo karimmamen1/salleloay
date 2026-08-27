@@ -68,7 +68,7 @@ export default function LoginPage() {
                 <span className="mb-2 block text-sm font-bold text-[#293530]">{t.username}</span>
                 <span className="relative block">
                   <UserRound className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8b958f]" size={19} />
-                  <input value={username} onChange={(e) => setUsername(e.target.value)} className="focus-ring h-14 w-full rounded-2xl border border-[#ded7ca] bg-[#fbfaf7] px-12 outline-none transition focus:border-[#b78b47]" autoComplete="username" placeholder="hani" required />
+                  <input value={username} onChange={(e) => setUsername(e.target.value)} className="focus-ring h-14 w-full rounded-2xl border border-[#ded7ca] bg-[#fbfaf7] px-12 outline-none transition focus:border-[#b78b47]" autoComplete="username" placeholder="user" required />
                 </span>
               </label>
               <label className="block">
