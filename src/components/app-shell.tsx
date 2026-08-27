@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
   return <div className="min-h-screen bg-[#f7f4ed] lg:grid lg:grid-cols-[260px_1fr]">
     {!online && <div className="fixed inset-x-0 top-0 z-[80] bg-[#8f342f] px-4 py-2 text-center text-xs font-bold text-white">{t.offlineTitle} {t.offlineBody}</div>}
-    <aside className={`fixed inset-y-0 z-50 w-[280px] bg-[#123f33] p-5 text-white transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:w-auto lg:translate-x-0 ${open ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`} style={{ insetInlineStart: 0 }}>
+    <aside data-open={open} className="app-sidebar fixed inset-y-0 z-50 w-[280px] bg-[#123f33] p-5 text-white transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:w-auto" style={{ insetInlineStart: 0 }}>
       <div className="flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-3">
           <Image src="/logo-louay.jpg" alt="Logo Salle des Fêtes Louay" width={48} height={48} priority className="h-12 w-12 rounded-2xl border border-[#d8b77b]/40 object-cover" />

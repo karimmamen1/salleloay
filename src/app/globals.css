@@ -27,3 +27,11 @@ button { cursor: pointer; }
   outline: 3px solid color-mix(in srgb, var(--gold) 60%, transparent);
   outline-offset: 2px;
 }
+
+.app-sidebar { translate: -100% 0; }
+[dir="rtl"] .app-sidebar { translate: 100% 0; }
+.app-sidebar[data-open="true"] { translate: 0 0; }
+
+@media (min-width: 64rem) {
+  .app-sidebar { translate: 0 0; }
+}
