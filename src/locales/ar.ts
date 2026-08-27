@@ -16,6 +16,7 @@ export const ar = {
   loginIntro: "سجل الدخول لإدارة تقويم القاعة.",
   calendarIntro: "نظرة واضحة على التواريخ المتاحة والمناسبات.",
   available: "متاح",
+  past: "منقضي",
   reserved: "محجوز",
   today: "اليوم",
   previousMonth: "الشهر السابق",

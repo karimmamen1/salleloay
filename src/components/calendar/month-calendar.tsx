@@ -31,6 +31,7 @@ export function MonthCalendar({ compact = false }: { compact?: boolean }) {
   const byDate = useMemo(() => new Map(reservations.map((item) => [item.reservationDate, item])), [reservations]);
   const selected = selectedDate ? byDate.get(selectedDate) : undefined;
   const today = todayAlgiers();
+  const selectedPast = Boolean(selectedDate && selectedDate < today);
   const firstWeekday = (new Date(month.getFullYear(), month.getMonth(), 1).getDay() + 6) % 7;
   const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
   const cells = Array.from({ length: firstWeekday + days }, (_, index) => index < firstWeekday ? null : index - firstWeekday + 1);
@@ -75,16 +76,16 @@ export function MonthCalendar({ compact = false }: { compact?: boolean }) {
             <span className={`inline-grid h-7 min-w-7 place-items-center rounded-full text-sm font-extrabold ${date === today ? "bg-[#b78b47] text-white" : "text-[#26322d]"}`}>{day}</span>
             {date === today && <span className="ms-1 hidden text-[9px] font-bold uppercase text-[#a67d3f] sm:inline">{t.today}</span>}
             <div className="mt-2">
-              {reservation ? <><span className="block truncate text-[10px] font-extrabold uppercase text-[#a43b35] sm:text-xs">{reservation.eventType === "other" ? reservation.customEventType : t.weddings[reservation.eventType]}</span><span className="mt-1 hidden truncate text-xs font-semibold text-[#6e423e] sm:block">{reservation.customerName.split(" ")[0]}</span></> : <><span className="block text-[9px] font-extrabold uppercase text-[#287255] sm:text-[11px]">{t.available}</span>{!past && <Plus className="mt-1 hidden text-[#4d8c70] sm:block" size={15} />}</>}
+              {reservation ? <><span className="block truncate text-[10px] font-extrabold uppercase text-[#a43b35] sm:text-xs">{reservation.eventType === "other" ? reservation.customEventType : t.weddings[reservation.eventType]}</span><span className="mt-1 hidden truncate text-xs font-semibold text-[#6e423e] sm:block">{reservation.customerName.split(" ")[0]}</span></> : past ? <span className="block text-[9px] font-extrabold uppercase text-[#8a918d] sm:text-[11px]">{t.past}</span> : <><span className="block text-[9px] font-extrabold uppercase text-[#287255] sm:text-[11px]">{t.available}</span><Plus className="mt-1 hidden text-[#4d8c70] sm:block" size={15} /></>}
             </div>
           </button>;
         })}
       </div>
-      <div className="flex flex-wrap items-center gap-5 p-4 text-xs font-bold text-[#64706a] sm:px-6"><span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#56a87c]" />{t.available}</span><span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#bd514a]" />{t.reserved}</span></div>
+      <div className="flex flex-wrap items-center gap-5 p-4 text-xs font-bold text-[#64706a] sm:px-6"><span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#56a87c]" />{t.available}</span><span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#bd514a]" />{t.reserved}</span><span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#b8bcb9]" />{t.past}</span></div>
     </section>
 
     <Dialog open={Boolean(selectedDate)} onClose={close} title={selectedDate ? formatDate(selectedDate, language) : ""} wide={mode === "form"}>
-      {selectedDate && mode === "status" && <div className="p-7 text-center"><span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#e5f2e9] text-2xl">✓</span><h3 className="mt-4 text-2xl font-extrabold text-[#123f33]">{t.available}</h3><p className="mt-2 text-[#75807b]">{formatDate(selectedDate, language)}</p><button disabled={!online || selectedDate < today} onClick={() => setMode("form")} className="mt-7 h-12 rounded-xl bg-[#123f33] px-7 font-bold text-white disabled:cursor-not-allowed disabled:opacity-45">{t.createReservation}</button></div>}
+      {selectedDate && mode === "status" && <div className="p-7 text-center"><span className={`mx-auto grid h-16 w-16 place-items-center rounded-full text-2xl ${selectedPast ? "bg-[#eceeec] text-[#7d8581]" : "bg-[#e5f2e9] text-[#123f33]"}`}>{selectedPast ? "—" : "✓"}</span><h3 className={`mt-4 text-2xl font-extrabold ${selectedPast ? "text-[#747b77]" : "text-[#123f33]"}`}>{selectedPast ? t.past : t.available}</h3><p className="mt-2 text-[#75807b]">{formatDate(selectedDate, language)}</p>{!selectedPast && <button disabled={!online} onClick={() => setMode("form")} className="mt-7 h-12 rounded-xl bg-[#123f33] px-7 font-bold text-white disabled:cursor-not-allowed disabled:opacity-45">{t.createReservation}</button>}</div>}
       {selectedDate && mode === "form" && <ReservationForm date={selectedDate} reservation={selected} busy={busy} onCancel={() => setMode(selected ? "details" : "status")} onSubmit={save} />}
       {selected && mode === "details" && <ReservationDetails reservation={selected} canDelete={profile?.role === "super_admin"} busy={busy} onEdit={() => setMode("form")} onDelete={remove} onClose={close} />}
     </Dialog>

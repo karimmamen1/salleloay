@@ -16,6 +16,7 @@ export const fr = {
   loginIntro: "Connectez-vous pour gérer le calendrier de la salle.",
   calendarIntro: "Une vue claire des disponibilités et célébrations.",
   available: "Disponible",
+  past: "Passé",
   reserved: "Réservé",
   today: "Aujourd'hui",
   previousMonth: "Mois précédent",

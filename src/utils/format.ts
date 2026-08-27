@@ -25,4 +25,16 @@ export const todayAlgiers = () => {
   return `${values.year}-${values.month}-${values.day}`;
 };
 
+export const countAvailableDaysInMonth = (monthKey: string, today: string, reservedDates: string[]) => {
+  const [year, month] = monthKey.split("-").map(Number);
+  if (!/^\d{4}-\d{2}$/.test(monthKey) || !/^\d{4}-\d{2}-\d{2}$/.test(today) || !year || month < 1 || month > 12) return 0;
+  const todayMonth = today.slice(0, 7);
+  if (monthKey < todayMonth) return 0;
+  const monthDays = new Date(year, month, 0).getDate();
+  const firstAvailableDay = monthKey === todayMonth ? Number(today.slice(8, 10)) : 1;
+  const firstAvailableDate = `${monthKey}-${String(firstAvailableDay).padStart(2, "0")}`;
+  const reserved = new Set(reservedDates.filter((date) => date.startsWith(`${monthKey}-`) && date >= firstAvailableDate)).size;
+  return Math.max(monthDays - firstAvailableDay + 1 - reserved, 0);
+};
+
 export const normalizePhone = (value: string) => value.replace(/[^0-9+]/g, "");

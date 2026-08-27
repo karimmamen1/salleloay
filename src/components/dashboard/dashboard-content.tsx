@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
 import { useMonthReservations, useUpcomingReservations } from "@/hooks/use-reservations";
-import { formatDate, formatMoney, todayAlgiers } from "@/utils/format";
+import { countAvailableDaysInMonth, formatDate, formatMoney, todayAlgiers } from "@/utils/format";
 
 export function DashboardContent() {
   const { profile } = useAuth();
@@ -20,7 +20,7 @@ export function DashboardContent() {
   const upcoming = useUpcomingReservations(today, 5);
   const stats = [
     { label: t.thisMonth, value: monthReservations.length.toLocaleString(language === "ar" ? "ar-DZ" : "fr-FR"), icon: CalendarCheck2, color: "bg-[#e9f2ed] text-[#24664e]" },
-    { label: t.availableDays, value: Math.max(monthDays - monthReservations.length, 0).toLocaleString(language === "ar" ? "ar-DZ" : "fr-FR"), icon: CalendarHeart, color: "bg-[#eef1e5] text-[#65702d]" },
+    { label: t.availableDays, value: countAvailableDaysInMonth(monthKey, today, monthReservations.map((item) => item.reservationDate)).toLocaleString(language === "ar" ? "ar-DZ" : "fr-FR"), icon: CalendarHeart, color: "bg-[#eef1e5] text-[#65702d]" },
     { label: t.totalAdvances, value: formatMoney(monthReservations.reduce((sum, item) => sum + item.advancePayment, 0), language), icon: Coins, color: "bg-[#f6eddd] text-[#9b7133]" },
     { label: t.remainingCollect, value: formatMoney(monthReservations.reduce((sum, item) => sum + item.totalCost - item.advancePayment, 0), language), icon: Banknote, color: "bg-[#f5e7e5] text-[#99443f]" },
   ];
