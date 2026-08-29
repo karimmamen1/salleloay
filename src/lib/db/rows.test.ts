@@ -10,9 +10,10 @@ const reservationRow = {
   total_cost: 1000,
   advance_payment: 100,
   cook_name: "",
-  cook_cost: 0,
+  dj_name: "DJ Karim",
+  dj_type: "internal",
   server_count: 0,
-  cleaning_cost: 0,
+  cleaning_count: 3,
   created_by_user_id: "user-1",
   created_by_name: "Hani",
   created_at: new Date("2026-08-27T20:00:00.000Z"),
@@ -24,6 +25,19 @@ const reservationRow = {
 describe("database row mapping", () => {
   it("serializes PostgreSQL dates as YYYY-MM-DD", () => {
     expect(reservationFromRow(reservationRow).reservationDate).toBe("2026-08-28");
+  });
+
+  it("maps DJ and cleaning worker fields", () => {
+    const reservation = reservationFromRow(reservationRow);
+    expect(reservation.djName).toBe("DJ Karim");
+    expect(reservation.djType).toBe("internal");
+    expect(reservation.cleaningCount).toBe(3);
+  });
+
+  it("defaults unmigrated reservations safely", () => {
+    const reservation = reservationFromRow({ ...reservationRow, dj_name: undefined, dj_type: undefined, cleaning_count: undefined });
+    expect(reservation.djType).toBe("outsider");
+    expect(reservation.cleaningCount).toBe(0);
   });
 
   it("serializes audit reservation dates consistently", () => {

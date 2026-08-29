@@ -35,9 +35,10 @@ CREATE TABLE IF NOT EXISTS reservations (
   total_cost numeric(14,2) NOT NULL CHECK (total_cost >= 0),
   advance_payment numeric(14,2) NOT NULL CHECK (advance_payment >= 0 AND advance_payment <= total_cost),
   cook_name varchar(120) NOT NULL DEFAULT '',
-  cook_cost numeric(14,2) NOT NULL CHECK (cook_cost >= 0),
+  dj_name varchar(120) NOT NULL DEFAULT '',
+  dj_type varchar(16) NOT NULL DEFAULT 'outsider' CHECK (dj_type IN ('internal', 'outsider')),
   server_count integer NOT NULL CHECK (server_count >= 0),
-  cleaning_cost numeric(14,2) NOT NULL CHECK (cleaning_cost >= 0),
+  cleaning_count integer NOT NULL DEFAULT 0 CHECK (cleaning_count >= 0),
   created_by_user_id uuid REFERENCES users(id) ON DELETE SET NULL,
   created_by_name varchar(120) NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -47,6 +48,13 @@ CREATE TABLE IF NOT EXISTS reservations (
 );
 
 CREATE INDEX IF NOT EXISTS reservations_created_by_idx ON reservations(created_by_user_id);
+
+CREATE TABLE IF NOT EXISTS reservation_legacy_service_costs (
+  reservation_date date PRIMARY KEY,
+  cook_cost numeric(14,2),
+  cleaning_cost numeric(14,2),
+  archived_at timestamptz NOT NULL DEFAULT now()
+);
 
 CREATE TABLE IF NOT EXISTS audit_logs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -70,4 +78,3 @@ CREATE TABLE IF NOT EXISTS login_attempts (
   window_started_at timestamptz NOT NULL DEFAULT now(),
   locked_until timestamptz
 );
-

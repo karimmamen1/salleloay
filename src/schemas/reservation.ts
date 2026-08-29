@@ -11,8 +11,9 @@ export const reservationSchema = z.object({
   totalCost: numberField,
   advancePayment: numberField,
   cookName: z.string().trim().max(120).optional(),
-  cookCost: numberField,
+  djName: z.string().trim().max(120).optional(),
+  djType: z.enum(["internal", "outsider"]),
   serverCount: numberField.int(),
-  cleaningCost: numberField,
+  cleaningCount: numberField.int(),
 }).refine((data) => data.advancePayment <= data.totalCost, { path: ["advancePayment"], message: "advance-too-high" })
   .refine((data) => data.eventType !== "other" || Boolean(data.customEventType), { path: ["customEventType"], message: "required" });

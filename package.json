@@ -10,12 +10,15 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:migrate": "tsx scripts/migrate-postgres.ts",
+    "db:migrate-reservations": "tsx scripts/migrate-reservations.ts",
+    "pdf:samples": "esbuild scripts/render-pdf-samples.tsx --bundle --packages=external --platform=node --format=esm --outfile=tmp/pdfs/render-samples.mjs && node tmp/pdfs/render-samples.mjs",
     "deploy": "vercel --prod",
     "create-super-admin": "tsx scripts/create-super-admin.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@neondatabase/serverless": "^1.1.0",
+    "@react-pdf/renderer": "^4.9.0",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^0.542.0",
     "next": "^16.3.3",

@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  outputFileTracingIncludes: {
+    "/api/reservations/*/receipt": ["./public/fonts/*.ttf"],
+    "/api/reports/monthly": ["./public/fonts/*.ttf"],
+  },
   async headers() {
     return [
       {

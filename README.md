@@ -8,6 +8,8 @@ Application interne bilingue (français/arabe RTL) pour gérer les réservations
 - Rôles `super_admin` et `admin`, comptes actifs ou désactivés.
 - Calendrier mensuel : vert = disponible, rouge = réservé, une seule réservation par date.
 - Création et édition transactionnelles ; déplacement de date et suppression réservés au Super Admin.
+- Personnel et services : cuisinier, DJ interne/externe, serveurs et nombre d'agents de ménage.
+- Reçus PDF bilingues avec talon détachable et rapport mensuel PDF réservé au Super Admin.
 - Gestion sécurisée des administrateurs, réinitialisation de mot de passe et journal d'audit.
 - Interface française/arabe RTL, responsive et installable comme PWA.
 
@@ -50,6 +52,18 @@ Le mot de passe doit contenir au moins 12 caractères, avec majuscule, minuscule
 
 Les migrations sont idempotentes : `npm run db:migrate` peut être relancé sans effacer les données.
 
+### Migration des champs de réservation
+
+La migration ajoute `dj_name`, `dj_type` et `cleaning_count`. Les anciens montants `cook_cost` et `cleaning_cost` sont copiés dans `reservation_legacy_service_costs` avant la suppression des colonnes. `cleaning_count` est initialisé à `0` pour les anciens dossiers : un ancien prix de ménage n'est jamais interprété comme un nombre d'agents.
+
+```bash
+npm run db:migrate
+# ou, pour exécuter uniquement cette migration :
+npm run db:migrate-reservations
+```
+
+Après la migration, vérifiez manuellement le DJ et le nombre d'agents de ménage des réservations historiques.
+
 ## Validation
 
 ```bash
@@ -57,6 +71,12 @@ npm test
 npm run lint
 npm run typecheck
 npm run build
+```
+
+Pour générer les deux PDF de contrôle locaux (reçu et rapport mensuel) dans `tmp/pdfs/` :
+
+```bash
+npm run pdf:samples
 ```
 
 ## Sécurité et modèle de données

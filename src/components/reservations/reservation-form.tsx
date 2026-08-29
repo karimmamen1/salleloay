@@ -14,9 +14,9 @@ const numeric = { valueAsNumber: true } as const;
 
 export function ReservationForm({ date, reservation, busy, onCancel, onSubmit }: { date: string; reservation?: Reservation; busy: boolean; onCancel: () => void; onSubmit: (data: ReservationInput) => Promise<void> }) {
   const { language, t } = useLanguage();
-  const defaults: FormValues = reservation ? { ...reservation } : { reservationDate: date, customerName: "", phone: "", eventType: "wedding", customEventType: null, guestCount: 0, totalCost: 0, advancePayment: 0, cookName: "", cookCost: 0, serverCount: 0, cleaningCost: 0 };
-  const { register, handleSubmit, control, formState: { errors, isDirty } } = useForm<FormValues>({ resolver: zodResolver(reservationSchema), defaultValues: defaults });
-  const [watchedTotal, watchedAdvance, eventType] = useWatch({ control, name: ["totalCost", "advancePayment", "eventType"] });
+  const defaults: FormValues = reservation ? { ...reservation } : { reservationDate: date, customerName: "", phone: "", eventType: "wedding", customEventType: null, guestCount: 0, totalCost: 0, advancePayment: 0, cookName: "", djName: "", djType: "internal", serverCount: 0, cleaningCount: 0 };
+  const { register, handleSubmit, control, setValue, formState: { errors, isDirty } } = useForm<FormValues>({ resolver: zodResolver(reservationSchema), defaultValues: defaults });
+  const [watchedTotal, watchedAdvance, eventType, djType] = useWatch({ control, name: ["totalCost", "advancePayment", "eventType", "djType"] });
   const total = Number(watchedTotal) || 0;
   const advance = Number(watchedAdvance) || 0;
 
@@ -49,9 +49,19 @@ export function ReservationForm({ date, reservation, busy, onCancel, onSubmit }:
 
     <FormSection title={t.servicesSection}>
       <label className={label}>{t.cook}<input className={fieldClass} {...register("cookName")} /></label>
-      <label className={label}>{t.cookCost}<MoneyField className={fieldClass} registration={register("cookCost", numeric)} />{error("cookCost")}</label>
+      <label className={label}>{t.djName}<input className={fieldClass} {...register("djName")} /></label>
+      <div className={`${label} sm:col-span-2`}>
+        <span>{t.djType}</span>
+        <input type="hidden" {...register("djType")} />
+        <div className="mt-2 grid grid-cols-2 gap-2 rounded-2xl bg-[#f2f0ea] p-1.5" role="group" aria-label={t.djType}>
+          {(["internal", "outsider"] as const).map((value) => {
+            const selected = djType === value;
+            return <button key={value} type="button" aria-pressed={selected} onClick={() => setValue("djType", value, { shouldDirty: true, shouldValidate: true })} className={`h-11 rounded-xl text-sm font-extrabold transition ${selected ? "bg-[#123f33] text-white shadow-md" : "text-[#69746e] hover:bg-white"}`}>{value === "internal" ? t.djInternal : t.djOutsider}</button>;
+          })}
+        </div>
+      </div>
       <label className={label}>{t.servers}<input className={fieldClass} {...register("serverCount", numeric)} type="number" min="0" inputMode="numeric" />{error("serverCount")}</label>
-      <label className={label}>{t.cleaning}<MoneyField className={fieldClass} registration={register("cleaningCost", numeric)} />{error("cleaningCost")}</label>
+      <label className={label}>{t.cleaning}<input className={fieldClass} {...register("cleaningCount", numeric)} type="number" min="0" step="1" inputMode="numeric" />{error("cleaningCount")}</label>
     </FormSection>
     <div className="sticky bottom-0 -mx-5 -mb-5 mt-7 flex gap-3 border-t border-[#ece7de] bg-white p-5 sm:-mx-7 sm:-mb-7 sm:px-7">
       <button disabled={busy} className="h-12 flex-1 rounded-xl border border-[#ded7ca] font-bold text-[#59645f]" type="button" onClick={close}>{t.cancel}</button>

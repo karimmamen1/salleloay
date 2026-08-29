@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarDays, ClipboardList, History, LayoutDashboard, LogOut, Menu, Users, X } from "lucide-react";
+import { CalendarDays, ClipboardList, FileBarChart, History, LayoutDashboard, LogOut, Menu, Users, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
@@ -22,6 +22,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/calendar", label: t.calendar, icon: CalendarDays },
     { href: "/reservations", label: t.reservations, icon: ClipboardList },
     ...(profile?.role === "super_admin" ? [
+      { href: "/monthly-report", label: t.monthlyReport, icon: FileBarChart },
       { href: "/admins", label: t.administrators, icon: Users },
       { href: "/audit", label: t.audit, icon: History },
     ] : []),
@@ -72,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </div>
 
     <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-[22px] border border-[#ddd6ca] bg-white/95 p-2 shadow-[0_15px_40px_rgba(30,40,35,.18)] backdrop-blur-xl lg:hidden">
-      {nav.slice(0, 5).map((item) => { const active = pathname.startsWith(item.href); return <Link key={item.href} href={item.href} aria-label={item.label} className={`grid min-h-12 min-w-12 place-items-center rounded-2xl ${active ? "bg-[#123f33] text-white" : "text-[#77817c]"}`}><item.icon size={20} /></Link>; })}
+      {nav.map((item) => { const active = pathname.startsWith(item.href); return <Link key={item.href} href={item.href} aria-label={item.label} className={`grid min-h-12 min-w-12 place-items-center rounded-2xl ${active ? "bg-[#123f33] text-white" : "text-[#77817c]"}`}><item.icon size={20} /></Link>; })}
     </nav>
   </div>;
 }

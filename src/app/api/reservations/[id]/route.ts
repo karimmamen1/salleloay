@@ -46,8 +46,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
             reservation_date = ${data.reservationDate}, customer_name = ${data.customerName}, phone = ${data.phone},
             event_type = ${data.eventType}, custom_event_type = ${data.eventType === "other" ? data.customEventType || "" : null},
             guest_count = ${data.guestCount}, total_cost = ${data.totalCost}, advance_payment = ${data.advancePayment},
-            cook_name = ${data.cookName || ""}, cook_cost = ${data.cookCost}, server_count = ${data.serverCount},
-            cleaning_cost = ${data.cleaningCost}, updated_by_user_id = ${caller.uid}, updated_by_name = ${caller.name},
+            cook_name = ${data.cookName || ""}, dj_name = ${data.djName || ""}, dj_type = ${data.djType},
+            server_count = ${data.serverCount}, cleaning_count = ${data.cleaningCount},
+            updated_by_user_id = ${caller.uid}, updated_by_name = ${caller.name},
             updated_at = now()
           WHERE reservation_date = ${originalDate}
           RETURNING *
@@ -88,4 +89,3 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     return jsonError(error);
   }
 }
-

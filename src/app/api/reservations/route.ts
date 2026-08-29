@@ -43,13 +43,13 @@ export async function POST(request: Request) {
         WITH inserted AS (
           INSERT INTO reservations (
             reservation_date, customer_name, phone, event_type, custom_event_type, guest_count,
-            total_cost, advance_payment, cook_name, cook_cost, server_count, cleaning_cost,
+            total_cost, advance_payment, cook_name, dj_name, dj_type, server_count, cleaning_count,
             created_by_user_id, created_by_name, updated_by_user_id, updated_by_name
           ) VALUES (
             ${data.reservationDate}, ${data.customerName}, ${data.phone}, ${data.eventType},
             ${data.eventType === "other" ? data.customEventType || "" : null}, ${data.guestCount},
-            ${data.totalCost}, ${data.advancePayment}, ${data.cookName || ""}, ${data.cookCost},
-            ${data.serverCount}, ${data.cleaningCost}, ${caller.uid}, ${caller.name}, ${caller.uid}, ${caller.name}
+            ${data.totalCost}, ${data.advancePayment}, ${data.cookName || ""}, ${data.djName || ""}, ${data.djType},
+            ${data.serverCount}, ${data.cleaningCount}, ${caller.uid}, ${caller.name}, ${caller.uid}, ${caller.name}
           ) RETURNING *
         ), logged AS (
           INSERT INTO audit_logs (action, performed_by_user_id, performed_by_name, reservation_id)
@@ -66,4 +66,3 @@ export async function POST(request: Request) {
     return jsonError(error);
   }
 }
-
