@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ApiError, assertSameOrigin, jsonError } from "@/lib/api/server";
 import { requireUser } from "@/lib/auth/server";
-import { database, isUniqueViolation } from "@/lib/db/client";
+import { database, ensureReservationSchema, isUniqueViolation } from "@/lib/db/client";
 import { reservationFromRow } from "@/lib/db/rows";
 import { reservationSchema } from "@/schemas/reservation";
 
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     if (!parsed.success) throw new ApiError(400, "invalid-argument");
     const data = parsed.data;
     const sql = database();
+    await ensureReservationSchema(sql);
     try {
       const rows = await sql`
         WITH inserted AS (

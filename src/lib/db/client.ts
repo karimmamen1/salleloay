@@ -1,9 +1,11 @@
 import "server-only";
 
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
+import { migrateReservationFields } from "./reservation-migration";
 
 let cachedUrl = "";
 let cachedClient: NeonQueryFunction<false, false> | undefined;
+let reservationMigration: Promise<void> | undefined;
 
 export function database() {
   const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -13,6 +15,16 @@ export function database() {
     cachedClient = neon(url);
   }
   return cachedClient;
+}
+
+export function ensureReservationSchema(sql = database()) {
+  if (!reservationMigration) {
+    reservationMigration = migrateReservationFields(sql).catch((error) => {
+      reservationMigration = undefined;
+      throw error;
+    });
+  }
+  return reservationMigration;
 }
 
 export function isUniqueViolation(error: unknown) {

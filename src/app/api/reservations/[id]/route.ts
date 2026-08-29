@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ApiError, assertSameOrigin, jsonError } from "@/lib/api/server";
 import { requireUser } from "@/lib/auth/server";
-import { database, isUniqueViolation } from "@/lib/db/client";
+import { database, ensureReservationSchema, isUniqueViolation } from "@/lib/db/client";
 import { reservationFromRow } from "@/lib/db/rows";
 import { reservationSchema } from "@/schemas/reservation";
 
@@ -39,6 +39,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     }
 
     const sql = database();
+    await ensureReservationSchema(sql);
     try {
       const rows = await sql`
         WITH updated AS (
