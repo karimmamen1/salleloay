@@ -138,9 +138,8 @@ const report = StyleSheet.create({
   fixedHeader: { height: 62, borderBottomWidth: 1.5, borderBottomColor: colors.gold, alignItems: "center", justifyContent: "center", marginBottom: 9 },
   table: { borderWidth: 0.75, borderColor: colors.line, borderRadius: 4, overflow: "hidden" },
   tableHeader: { height: 28, flexDirection: "row", backgroundColor: colors.green, color: "#ffffff", alignItems: "center" },
-  row: { flexDirection: "row", minHeight: 25, borderBottomWidth: 0.5, borderBottomColor: colors.line, alignItems: "center" },
-  cell: { paddingHorizontal: 4, fontSize: 7.2, textAlign: "center", borderRightWidth: 0.5, borderRightColor: colors.line },
-  centered: { textAlign: "center" },
+  row: { flexDirection: "row", minHeight: 25, borderBottomWidth: 0.5, borderBottomColor: colors.line, alignItems: "stretch" },
+  cell: { paddingHorizontal: 4, fontSize: 7.2, borderRightWidth: 0.5, borderRightColor: colors.line, alignSelf: "stretch", justifyContent: "center" },
   cDate: { width: "11%" },
   cClient: { width: "20%" },
   cEvent: { width: "15%" },
@@ -154,8 +153,8 @@ const report = StyleSheet.create({
   summaryValue: { color: colors.green, fontWeight: 700, fontSize: 11, marginTop: 2, textAlign: "center" },
 });
 
-function ReportCell({ children, style, center = false }: { children: string | number; style: Style; center?: boolean }) {
-  return <Text style={[report.cell, style, ...(center ? [report.centered] : [])]}>{String(children)}</Text>;
+function ReportCell({ children, style }: { children: string | number; style: Style }) {
+  return <View style={[report.cell, style]}><Text style={{ textAlign: "center" }}>{String(children)}</Text></View>;
 }
 
 function ReportHeaderCell({ label, style }: { label: string; style: Style }) {
