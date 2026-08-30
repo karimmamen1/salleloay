@@ -19,7 +19,7 @@ export async function POST(request: Request, context: { params: Promise<{ uid: s
     const rows = await database()`
       WITH updated AS (
         UPDATE users SET password_hash = ${passwordHash}, updated_at = now(), updated_by = ${caller.uid}
-        WHERE id = ${uid} AND role = 'admin' RETURNING id
+        WHERE id = ${uid} AND (role = 'admin' OR id = ${caller.uid}) RETURNING id
       ), logged AS (
         INSERT INTO audit_logs (action, performed_by_user_id, performed_by_name, target_user_id)
         SELECT 'admin_password_reset', ${caller.uid}, ${caller.name}, id FROM updated

@@ -182,8 +182,9 @@ export function AdminManagement() {
 type Dictionary = ReturnType<typeof useLanguage>["t"];
 
 function AdminActions({ admin, currentUid, busy, t, onEdit, onPassword, onToggle, onDelete }: { admin: AdminUser; currentUid?: string; busy: boolean; t: Dictionary; onEdit: (admin: AdminUser) => void; onPassword: (admin: AdminUser) => void; onToggle: (admin: AdminUser) => void; onDelete: (admin: AdminUser) => void }) {
-  if (admin.role === "super_admin" || admin.uid === currentUid) return <span className="text-xs font-semibold text-[#9a8260]">{t.superAdmin}</span>;
   const button = "inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2f0ea] text-[#4d5a54] transition hover:bg-[#e8e4db] disabled:opacity-40";
+  if (admin.uid === currentUid) return <button type="button" disabled={busy} className={button} onClick={() => onPassword(admin)} title={t.resetPassword} aria-label={t.resetPassword}><KeyRound size={16} /></button>;
+  if (admin.role === "super_admin") return <span className="text-xs font-semibold text-[#9a8260]">{t.superAdmin}</span>;
   return <div className="flex flex-wrap gap-2">
     <button type="button" className={button} onClick={() => onEdit(admin)} title={t.edit} aria-label={t.edit}><Pencil size={16} /></button>
     <button type="button" className={button} onClick={() => onPassword(admin)} title={t.resetPassword} aria-label={t.resetPassword}><KeyRound size={16} /></button>
