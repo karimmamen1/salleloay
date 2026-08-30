@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { ApiError, jsonError } from "@/lib/api/server";
 import { requireUser } from "@/lib/auth/server";
 import { database } from "@/lib/db/client";
@@ -25,7 +26,8 @@ export async function GET(request: Request) {
     const data: MonthlyReportData = { month, reservations, summary: summarizeReservations(reservations), generatedOn: todayAlgiers() };
     if (url.searchParams.get("format") !== "pdf") return Response.json({ data });
     if (!reservations.length) throw new ApiError(404, "no-reservations");
-    const pdf = await renderMonthlyReportPdf(data);
+    const fontBase = join(process.cwd(), "public", "fonts");
+    const pdf = await renderMonthlyReportPdf(data, fontBase);
     const inline = url.searchParams.get("inline") === "1";
     return new Response(new Uint8Array(pdf), {
       headers: {
